@@ -71,7 +71,7 @@ export const ReportSummaryCard: React.FC<Props> = ({ report }) => {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-950 hover:bg-indigo-900 border border-indigo-500/40 text-indigo-200 text-xs font-bold transition-all shadow-md"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isGenerating ? 'animate-spin' : ''}`} />
-              <span>{advice ? 'Refresh AI Advice' : 'Generate AI Doctor's Advice'}</span>
+              <span>{advice ? 'Refresh AI Advice' : "Generate AI Doctor's Advice"}</span>
             </button>
 
             <button
