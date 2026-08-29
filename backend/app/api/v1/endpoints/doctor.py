@@ -10,7 +10,7 @@ from app.models.user import User, DoctorProfile, PatientProfile, DoctorPatientAc
 from app.models.report import MedicalReport, ReportStatus
 from app.models.clinical import ClinicalNote
 from app.schemas.clinical import CreateClinicalNoteRequest
-from app.schemas.report import MedicalReportResponse
+from app.schemas.report import MedicalReportResponse, MedicalReportListItem
 from app.core.exceptions import NotFoundException, ForbiddenException
 
 router = APIRouter(prefix="/doctor", tags=["Doctor Workspace & Consultations"])
@@ -50,6 +50,33 @@ async def list_assigned_patients(
         })
 
     return patient_cards
+
+@router.get("/patients/{patient_id}/reports", response_model=List[MedicalReportListItem])
+async def list_patient_reports_for_doctor(
+    patient_id: str,
+    doctor_auth: tuple[User, DoctorProfile] = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Allow authorized physician to retrieve all digitized reports for a specific patient."""
+    _, doctor = doctor_auth
+    
+    # Check access permission
+    access_query = select(DoctorPatientAccess).where(
+        DoctorPatientAccess.doctor_id == doctor.id,
+        DoctorPatientAccess.patient_id == patient_id,
+        DoctorPatientAccess.is_active == True
+    )
+    acc_res = await db.execute(access_query)
+    if not acc_res.scalar_one_or_none():
+        raise ForbiddenException("You do not have authorized clinical access to this patient record.")
+
+    reports_query = (
+        select(MedicalReport)
+        .where(MedicalReport.patient_id == patient_id)
+        .order_by(MedicalReport.report_date.desc(), MedicalReport.created_at.desc())
+    )
+    res = await db.execute(reports_query)
+    return res.scalars().all()
 
 @router.post("/notes", status_code=status.HTTP_201_CREATED)
 async def add_clinical_note(

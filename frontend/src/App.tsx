@@ -12,13 +12,15 @@ import { ReportDetailsPage } from './pages/patient/ReportDetailsPage';
 import { ReportHistoryPage } from './pages/patient/ReportHistoryPage';
 import { AnalyticsPage } from './pages/patient/AnalyticsPage';
 import { DoctorDashboard } from './pages/doctor/DoctorDashboard';
+import { DoctorPatientReportsPage } from './pages/doctor/DoctorPatientReportsPage';
+import { DoctorReportReviewPage } from './pages/doctor/DoctorReportReviewPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRole?: 'PATIENT' | 'DOCTOR' }> = ({
   children,
   allowedRole,
 }) => {
   const { user, isLoading } = useAuth();
-  if (isLoading) return <div className="p-12 text-center text-xs text-slate-400">Checking authentication...</div>;
+  if (isLoading) return <div className="p-16 text-center text-xs text-slate-500">Checking authentication...</div>;
   if (!user) return <Navigate to="/login" replace />;
   if (allowedRole && user.role !== allowedRole) {
     return <Navigate to={user.role === 'PATIENT' ? '/patient/dashboard' : '/doctor/dashboard'} replace />;
@@ -30,7 +32,7 @@ export const App: React.FC = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+        <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
           <Navbar />
           <main className="flex-grow">
             <Routes>
@@ -95,6 +97,30 @@ export const App: React.FC = () => {
                 element={
                   <ProtectedRoute allowedRole="DOCTOR">
                     <DoctorDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor/patients/:patientId/reports"
+                element={
+                  <ProtectedRoute allowedRole="DOCTOR">
+                    <DoctorPatientReportsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor/reviews/:reportId"
+                element={
+                  <ProtectedRoute allowedRole="DOCTOR">
+                    <DoctorReportReviewPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor/reports/:id"
+                element={
+                  <ProtectedRoute allowedRole="DOCTOR">
+                    <DoctorReportReviewPage />
                   </ProtectedRoute>
                 }
               />
