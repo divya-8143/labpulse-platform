@@ -1,12 +1,12 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, Any, Dict
-from datetime import datetime
+from typing import Optional, Any, Dict, Union
+from datetime import datetime, date
 from app.models.user import UserRole, BiologicalSex
 
 class PatientProfileResponse(BaseModel):
     id: str
     full_name: str
-    date_of_birth: Optional[str] = None
+    date_of_birth: Optional[Union[date, str]] = None
     biological_sex: BiologicalSex
     blood_group: Optional[str] = None
     phone_number: Optional[str] = None

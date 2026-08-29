@@ -18,9 +18,14 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(true);
     setErrorMsg('');
     try {
-      await login(email, password);
-      navigate('/patient/dashboard');
+      const role = await login(email, password);
+      if (role === 'DOCTOR') {
+        navigate('/doctor/dashboard');
+      } else {
+        navigate('/patient/dashboard');
+      }
     } catch (err: any) {
+      console.error('Login error:', err);
       setErrorMsg(err.response?.data?.detail?.message || 'Invalid credentials. Please verify your email & password.');
     } finally {
       setIsSubmitting(false);
@@ -31,9 +36,14 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(true);
     setErrorMsg('');
     try {
-      await loginAsDemo(role);
-      navigate(role === 'PATIENT' ? '/patient/dashboard' : '/doctor/dashboard');
+      const userRole = await loginAsDemo(role);
+      if (userRole === 'DOCTOR') {
+        navigate('/doctor/dashboard');
+      } else {
+        navigate('/patient/dashboard');
+      }
     } catch (err: any) {
+      console.error('Demo login error:', err);
       setErrorMsg('Failed to log in with demo account.');
     } finally {
       setIsSubmitting(false);
@@ -53,7 +63,7 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* Card */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
           {/* 1-Click Demo Section */}
           <div className="space-y-2.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
@@ -63,7 +73,7 @@ export const LoginPage: React.FC = () => {
             <button
               onClick={() => handleDemo('PATIENT')}
               disabled={isSubmitting}
-              className="w-full py-3 px-4 bg-teal-950/70 hover:bg-teal-900/80 border border-teal-500/40 rounded-xl text-xs font-bold text-teal-200 flex items-center justify-between transition-all group"
+              className="w-full py-3 px-4 bg-teal-950/70 hover:bg-teal-900/80 border border-teal-500/40 rounded-2xl text-xs font-bold text-teal-200 flex items-center justify-between transition-all group"
             >
               <span className="flex items-center gap-2.5">
                 <UserCheck className="w-4 h-4 text-teal-400" />
@@ -75,7 +85,7 @@ export const LoginPage: React.FC = () => {
             <button
               onClick={() => handleDemo('DOCTOR')}
               disabled={isSubmitting}
-              className="w-full py-3 px-4 bg-indigo-950/70 hover:bg-indigo-900/80 border border-indigo-500/40 rounded-xl text-xs font-bold text-indigo-200 flex items-center justify-between transition-all group"
+              className="w-full py-3 px-4 bg-indigo-950/70 hover:bg-indigo-900/80 border border-indigo-500/40 rounded-2xl text-xs font-bold text-indigo-200 flex items-center justify-between transition-all group"
             >
               <span className="flex items-center gap-2.5">
                 <Stethoscope className="w-4 h-4 text-indigo-400" />
@@ -132,7 +142,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg shadow-teal-500/20 transition-all mt-2"
+              className="w-full py-3.5 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg shadow-teal-500/20 transition-all mt-2"
             >
               {isSubmitting ? 'Authenticating...' : 'Sign In'}
             </button>

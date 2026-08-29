@@ -6,8 +6,8 @@ interface AuthContextType {
   user: UserProfile | null;
   token: string | null;
   isLoading: boolean;
-  login: (email: string, pass: string) => Promise<void>;
-  loginAsDemo: (role: 'PATIENT' | 'DOCTOR') => Promise<void>;
+  login: (email: string, pass: string) => Promise<string>;
+  loginAsDemo: (role: 'PATIENT' | 'DOCTOR') => Promise<string>;
   registerPatient: (data: any) => Promise<void>;
   registerDoctor: (data: any) => Promise<void>;
   logout: () => void;
@@ -23,12 +23,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshProfile = async () => {
     try {
-      if (!localStorage.getItem('labpulse_token')) {
+      const storedToken = localStorage.getItem('labpulse_token');
+      if (!storedToken) {
         setUser(null);
         setIsLoading(false);
         return;
       }
-      const res = await api.get('/users/me');
+      const res = await api.get('/users/me', {
+        headers: { Authorization: `Bearer ${storedToken}` }
+      });
       setUser(res.data);
     } catch (err) {
       console.error('Failed to fetch user profile:', err);
@@ -43,18 +46,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refreshProfile();
   }, []);
 
-  const login = async (email: string, pass: string) => {
+  const login = async (email: string, pass: string): Promise<string> => {
     const res = await api.post('/auth/login', { email, password: pass });
-    const { access_token } = res.data;
+    const { access_token, role } = res.data;
     localStorage.setItem('labpulse_token', access_token);
     setToken(access_token);
-    await refreshProfile();
+    
+    // Fetch profile immediately with the new token
+    try {
+      const meRes = await api.get('/users/me', {
+        headers: { Authorization: `Bearer ${access_token}` }
+      });
+      setUser(meRes.data);
+    } catch (e) {
+      console.error('Error loading profile after login:', e);
+    }
+    
+    return role;
   };
 
-  const loginAsDemo = async (role: 'PATIENT' | 'DOCTOR') => {
+  const loginAsDemo = async (role: 'PATIENT' | 'DOCTOR'): Promise<string> => {
     const email = role === 'PATIENT' ? 'patient@labpulse.demo' : 'doctor@labpulse.demo';
     const password = role === 'PATIENT' ? 'PatientDemo123!' : 'DoctorDemo123!';
-    await login(email, password);
+    return await login(email, password);
   };
 
   const registerPatient = async (data: any) => {
