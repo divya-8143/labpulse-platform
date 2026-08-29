@@ -14,7 +14,7 @@ from app.schemas.report import (
 )
 from app.services.report_service import ReportService
 from app.services.clinical_advice_service import ClinicalAdviceService
-from app.core.exceptions import NotFoundException, ForbiddenException, BadRequestException
+from app.core.exceptions import NotFoundException, ForbiddenException, ValidationException
 
 router = APIRouter(prefix="/reports", tags=["Medical Reports Pipeline"])
 
